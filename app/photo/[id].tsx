@@ -84,6 +84,45 @@ export default function PhotoViewerScreen() {
   const handleDelete = () => {
     if (!currentPhoto) return;
 
+    const doDelete = async () => {
+      setDeleting(true);
+      try {
+        await deletePhoto(currentPhoto.id);
+
+        const newPhotos = photos.filter(
+          (p) => p.id !== currentPhoto.id
+        );
+        setPhotos(newPhotos);
+        showToast('Photo deleted');
+
+        if (newPhotos.length === 0) {
+          router.back();
+        } else {
+          setCurrentIndex((prev) =>
+            Math.min(prev, newPhotos.length - 1)
+          );
+        }
+      } catch (err: any) {
+        console.error('[Delete Error]', err);
+        if (Platform.OS === 'web') {
+          window.alert('Delete Failed: ' + (err.message || 'Unknown error.'));
+        } else {
+          Alert.alert(
+            'Delete Failed',
+            err.message || 'Unknown error. Check console for details.'
+          );
+        }
+      } finally {
+        setDeleting(false);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Delete Photo?\n\nThis will permanently remove the photo from your library.');
+      if (confirmed) doDelete();
+      return;
+    }
+
     Alert.alert(
       'Delete Photo',
       'This will permanently remove the photo from your library.',
@@ -92,34 +131,7 @@ export default function PhotoViewerScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            setDeleting(true);
-            try {
-              await deletePhoto(currentPhoto.id);
-
-              const newPhotos = photos.filter(
-                (p) => p.id !== currentPhoto.id
-              );
-              setPhotos(newPhotos);
-              showToast('Photo deleted');
-
-              if (newPhotos.length === 0) {
-                router.back();
-              } else {
-                setCurrentIndex((prev) =>
-                  Math.min(prev, newPhotos.length - 1)
-                );
-              }
-            } catch (err: any) {
-              console.error('[Delete Error]', err);
-              Alert.alert(
-                'Delete Failed',
-                err.message || 'Unknown error. Check console for details.'
-              );
-            } finally {
-              setDeleting(false);
-            }
-          },
+          onPress: doDelete,
         },
       ]
     );

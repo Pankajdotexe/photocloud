@@ -36,14 +36,6 @@
         "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
         "android.permission.ACCESS_MEDIA_LOCATION",
         "android.permission.READ_MEDIA_VIDEO",
-        "android.permission.READ_MEDIA_AUDIO",
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.ACCESS_MEDIA_LOCATION",
-        "android.permission.READ_MEDIA_VIDEO",
         "android.permission.READ_MEDIA_AUDIO"
       ],
       "package": "com.anonymous.PhotoCloud"
@@ -77,7 +69,11 @@
       "supabaseUrl": "https://mrrgqwinrupgbngunslo.supabase.co",
       "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ycmdxd2lucnVwZ2JuZ3Vuc2xvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0Njk3NzgsImV4cCI6MjA5NDA0NTc3OH0.5l1GELDtUOea5EoXvHjG0NK734tQvqb_uP-myjzmVeE",
       "cloudinaryCloudName": "ydhnirqcx0",
-      "cloudinaryUploadPreset": "ml_default"
+      "cloudinaryUploadPreset": "ml_default",
+      "router": {},
+      "eas": {
+        "projectId": "1cf971a0-de1a-4a78-b451-6e1566547647"
+      }
     }
   }
 }

@@ -191,6 +191,32 @@ export default function HomeScreen() {
   // ── Bulk delete ───────────────────────────────────────────────────────────
   const handleBulkDelete = () => {
     if (selected.size === 0) return;
+    
+    const doDelete = async () => {
+      setDeleting(true);
+      try {
+        await deleteMultiplePhotos([...selected]);
+        const newPhotos = photos.filter((p) => !selected.has(p.id));
+        setPhotos(newPhotos);
+        setListItems(groupPhotosByMonth(newPhotos));
+        exitSelectMode();
+      } catch (err: any) {
+        if (Platform.OS === 'web') {
+          window.alert('Delete Failed: ' + err.message);
+        } else {
+          Alert.alert('Delete Failed', err.message);
+        }
+      } finally {
+        setDeleting(false);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(`Delete ${selected.size} Photo${selected.size > 1 ? 's' : ''}?\n\nThis will permanently remove the selected photos.`);
+      if (confirmed) doDelete();
+      return;
+    }
+
     Alert.alert(
       `Delete ${selected.size} Photo${selected.size > 1 ? 's' : ''}`,
       'This will permanently remove the selected photos.',
@@ -199,20 +225,7 @@ export default function HomeScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            setDeleting(true);
-            try {
-              await deleteMultiplePhotos([...selected]);
-              const newPhotos = photos.filter((p) => !selected.has(p.id));
-              setPhotos(newPhotos);
-              setListItems(groupPhotosByMonth(newPhotos));
-              exitSelectMode();
-            } catch (err: any) {
-              Alert.alert('Delete Failed', err.message);
-            } finally {
-              setDeleting(false);
-            }
-          },
+          onPress: doDelete,
         },
       ]
     );

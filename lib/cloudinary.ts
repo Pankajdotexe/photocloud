@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 // ─── Cloudinary Credentials ────────────────────────────────────────────────
 const CLOUD_NAME = 'dhnirqcx0';
 const UPLOAD_PRESET = 'ml_default';
@@ -13,8 +15,17 @@ export async function uploadToCloudinary(
   uri: string
 ): Promise<{ url: string; thumbnail_url: string }> {
   const formData = new FormData();
-  // @ts-ignore — React Native FormData accepts this shape
-  formData.append('file', { uri, type: 'image/jpeg', name: 'photo.jpg' });
+
+  if (Platform.OS === 'web') {
+    // On web, we must pass a Blob or File to FormData
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    formData.append('file', blob, 'photo.jpg');
+  } else {
+    // @ts-ignore — React Native FormData accepts this shape
+    formData.append('file', { uri, type: 'image/jpeg', name: 'photo.jpg' });
+  }
+
   formData.append('upload_preset', UPLOAD_PRESET);
 
   const res = await fetch(`${CLOUDINARY_BASE}/image/upload`, {

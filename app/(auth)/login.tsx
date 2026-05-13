@@ -23,29 +23,63 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleAuth = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please enter your email and password.');
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      Alert.alert('Missing Fields', 'Please enter your email and password.');
+      return;
+    }
+
+    if (isSignUp && trimmedPassword.length < 6) {
+      Alert.alert('Weak Password', 'Password must be at least 6 characters.');
       return;
     }
 
     setLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({
+          email: trimmedEmail,
+          password: trimmedPassword,
+        });
+
         if (error) throw error;
-        Alert.alert(
-          'Check your email',
-          'We sent a confirmation link to your email.'
-        );
+
+        if (data.session) {
+          // Email confirmation is disabled — user is logged in immediately ✅
+          // AuthContext will detect the session and redirect automatically
+        } else if (data.user && !data.session) {
+          // Email confirmation is enabled — user must confirm first
+          Alert.alert(
+            '📧 Check Your Email',
+            `A confirmation link was sent to:\n\n${trimmedEmail}\n\nClick the link in the email, then come back and sign in.`,
+            [{ text: 'OK', onPress: () => setIsSignUp(false) }]
+          );
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: trimmedEmail,
+          password: trimmedPassword,
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('Email not confirmed')) {
+            Alert.alert(
+              'Email Not Confirmed',
+              'Please check your inbox and click the confirmation link first.'
+            );
+          } else if (error.message.includes('Invalid login credentials')) {
+            Alert.alert(
+              'Wrong Credentials',
+              'Email or password is incorrect. Please try again.'
+            );
+          } else {
+            throw error;
+          }
+        }
       }
     } catch (error: any) {
-      Alert.alert('Authentication Error', error.message);
+      Alert.alert('Error', error.message);
     } finally {
       setLoading(false);
     }
