@@ -79,7 +79,42 @@ export default function LoginScreen() {
         }
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      if (Platform.OS === 'web') {
+        window.alert('Error: ' + error.message);
+      } else {
+        Alert.alert('Error', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      if (Platform.OS === 'web') {
+        window.alert('Please enter your email address first to reset your password.');
+      } else {
+        Alert.alert('Email Required', 'Please enter your email address first to reset your password.');
+      }
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail);
+      if (error) throw error;
+      if (Platform.OS === 'web') {
+        window.alert('Check your email for a password reset link.');
+      } else {
+        Alert.alert('Password Reset', 'Check your email for a password reset link.');
+      }
+    } catch (error: any) {
+      if (Platform.OS === 'web') {
+        window.alert('Error: ' + error.message);
+      } else {
+        Alert.alert('Error', error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -170,6 +205,16 @@ export default function LoginScreen() {
                 />
               </TouchableOpacity>
             </View>
+
+            {/* Forgot Password */}
+            {!isSignUp && (
+              <TouchableOpacity
+                onPress={handleForgotPassword}
+                style={styles.forgotPasswordContainer}
+              >
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            )}
 
             {/* Submit Button */}
             <TouchableOpacity
@@ -334,6 +379,16 @@ const styles = StyleSheet.create({
   toggleLink: {
     color: '#6366f1',
     fontSize: 14,
+    fontWeight: '600',
+  },
+  forgotPasswordContainer: {
+    alignSelf: 'flex-end',
+    marginBottom: 16,
+    marginTop: -4,
+  },
+  forgotPasswordText: {
+    color: '#6366f1',
+    fontSize: 13,
     fontWeight: '600',
   },
 });
